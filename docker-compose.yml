@@ -1,0 +1,45 @@
+version: '3'
+services:
+
+  speedtest-influxdb:
+    image: speedtest-influxdb
+    container_name: speedtest-influxdb
+    restart: always
+    hostname: 'speedtest-influxdb'
+    depends_on:
+      - influxdb
+    environment:
+      INFLUXDB_DB: mydb
+      
+  influxdb:
+    container_name: influxdb
+    image: influxdb
+    restart: always
+    hostname: 'influxdb'
+    environment:
+      Whatever: dshbrd
+    ports:
+      - '8086:8086'
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+      - ./influxdb.conf:/etc/influxdb/influxdb.conf:ro
+  
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:v2.16.0
+    volumes:
+      - ./prometheus/:/etc/prometheus/
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+    ports:
+      - 9090:9090
+
+  grafana:
+    container_name: grafana
+    image: grafana/grafana:7.1.5
+    ports:
+      - 3000:3000
+
+networks:
+  default:
